@@ -1,0 +1,390 @@
+---
+title: "DSGraphs"
+author: "Mari Leonard"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+final16_17$winner <- ifelse(final16_17$Goals_Home > final16_17$Goals_Visitor, 
+                           final16_17$Home_name,  # Home team wins
+                           ifelse(final16_17$Goals_Home < final16_17$Goals_Visitor, 
+                                  final16_17$Visitor_Name,  # Away team wins
+                                  "Tie"))  # Tie case
+
+# Print the updated dataframe
+# print(final16_17)
+
+```
+
+```{r}
+final16_17 <- final16_17 %>%
+  mutate(
+    Home_Won = ifelse(winner == Home_name, 1, 0),
+    Away_Won = ifelse(winner == Visitor_Name, 1, 0)
+  )
+
+## 1 - yes
+## 0 - no 
+```
+
+
+```{r}
+final17_18$winner <- ifelse(final17_18$Goals_Home > final17_18$Goals_Visitor, 
+                           final17_18$Home_Name,  # Home team wins
+                           ifelse(final17_18$Goals_Home < final17_18$Goals_Visitor, 
+                                  final17_18$Visitor_Name.x,  # Away team wins
+                                  "Tie"))  # Tie case
+
+# Print the updated dataframe
+print(final17_18)
+```
+
+```{r}
+final17_18 <- final17_18 %>%
+  mutate(
+    Home_Won = ifelse(winner == Home_Name, 1, 0),
+    Away_Won = ifelse(winner == Visitor_Name.x, 1, 0)
+  )
+
+## 1 - yes
+## 0 - no 
+```
+
+
+```{r}
+# Check if df is created correctly
+print(final16_17)
+
+win_counts <- data.frame(
+  Category = c("Home Wins", "Away Wins"),
+  Count = c(sum(final16_17_new$Home_Won, na.rm = TRUE), 
+            sum(final16_17_new$Away_Won, na.rm = TRUE))
+)
+print(win_counts)
+
+```
+
+
+
+```{r}
+ggplot(win_counts, aes(x = Category, y = Count, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Home vs Away Wins", x = "Win Type", y = "Number of Wins") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Home Wins" = "blue", "Away Wins" = "red"))
+```
+
+```{r}
+total_travel <- data.frame(
+  Category = c("Home Travel", "Away Travel"),
+  Count = c(sum(final16_17_new$Distance_H, na.rm = TRUE), 
+            sum(final16_17_new$Distance_V, na.rm = TRUE)))
+
+print(total_travel)
+```
+
+```{r}
+ggplot(data = total_travel, aes(x = Category, y = Count, fill = Category))+
+  geom_col()
+```
+
+
+
+```{r}
+goal_counts <- data.frame(
+  Category = c("Home Goals", "Away Goals"),
+  Count = c(sum(final16_17_new$Goals_Home, na.rm = TRUE), 
+            sum(final16_17_new$Goals_Visitor, na.rm = TRUE)))
+  
+print(goal_counts)
+```
+
+```{r}
+win_counts1 <- data.frame(
+  Category = c("Home Wins", "Away Wins"),
+  Count = c(sum(total16_18$Home_Won, na.rm = TRUE), 
+            sum(total16_18$Away_Won, na.rm = TRUE))
+)
+print(win_counts1)
+```
+
+```{r}
+ggplot(win_counts1, aes(x = Category, y = Count, fill = Category)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Home vs Away Wins", x = "Win Type", y = "Number of Wins") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Home Wins" = "blue", "Away Wins" = "red"))
+```
+
+
+```{r}
+library(ggplot2)
+
+ggplot(team_wins, aes(x = conference, y = wins, fill = conference))+
+  geom_boxplot() +
+  labs(title = "Wins by Conference", x = "Conference", y = "Number of Wins")+
+  scale_fill_manual(values = c("Eastern" = "blue", "Western" = "gold"))+
+  theme_minimal()
+```
+
+
+```{r}
+t.test(wins ~ conference, data = team_wins)
+```
+
+```{r}
+t.test(total_distance ~ conference, data = team_travel)
+```
+
+```{r}
+colors()
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(team_travel %>% filter(!is.na(team) & !is.na(conference)), 
+       aes(x = reorder(team, total_distance), y = total_distance, fill = conference)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Total Travel Distance by NHL Team",
+       x = "Team",
+       y = "Total Distance Traveled") +
+  scale_fill_manual(values = c("Eastern" = "blue", "Western" = "gold")) +
+  theme_minimal()
+
+```
+
+```{r}
+ggplot(team_travel %>% filter(!is.na(team) & !is.na(conference)),
+       aes(x = conference, y = total_distance, fill = conference)) +
+  geom_boxplot() +
+  labs(title = "Total Travel Distance by Conference", x = "Conference", y = "Total Travel Distance") +
+  scale_fill_manual(values = c("Eastern" = "blue", "Western" = "gold")) +
+  theme_minimal()
+
+```
+
+```{r}
+# Calculate the average travel distance
+avg_travel_distance <- mean(team_travel$total_distance)
+
+# Create a new column indicating above or below average
+team_travel <- team_travel %>%
+  mutate(above_average = ifelse(total_distance > avg_travel_distance, "Above", "Below"))
+
+# Calculate the proportion of teams in each conference with above-average travel
+prop_table <- table(team_travel$conference, team_travel$above_average) / 
+  rowSums(table(team_travel$conference, team_travel$above_average))
+
+prop_table
+
+```
+```{r}
+# ANOVA to compare travel distance across multiple conferences
+aov_result <- aov(total_distance ~ conference, data = team_travel)
+summary(aov_result)
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Filter for Eastern Conference teams and their divisions
+eastern_divisions <- team_travel %>%
+  filter(conference == "Eastern") %>%
+  group_by(team, division) %>%
+  summarise(total_wins = sum(wins, na.rm = TRUE)) %>%
+  arrange(division, total_wins)
+
+# Create the plot
+ggplot(eastern_divisions, aes(x = reorder(team, total_wins), y = total_wins, fill = division)) +
+  geom_bar(stat = "identity") +
+  coord_flip() + 
+  labs(title = "Comparison of Wins within the Eastern Conference Divisions",
+       x = "Team", 
+       y = "Total Wins") +
+  scale_fill_manual(values = c("Atlantic" = "skyblue", "Metropolitan" = "lightgreen")) +
+  theme_minimal()
+
+```
+```{r}
+# Filter for Western Conference teams and their divisions
+western_divisions <- team_travel %>%
+  filter(conference == "Western") %>%
+  group_by(team, division) %>%
+  summarise(total_wins = sum(wins, na.rm = TRUE)) %>%
+  arrange(division, total_wins)
+
+# Create the plot
+ggplot(western_divisions, aes(x = reorder(team, total_wins), y = total_wins, fill = division)) +
+  geom_bar(stat = "identity") +
+  coord_flip() + 
+  labs(title = "Comparison of Wins within the Western Conference Divisions",
+       x = "Team", 
+       y = "Total Wins") +
+  scale_fill_manual(values = c("Central" = "lightcoral", "Pacific" = "lightblue")) +
+  theme_minimal()
+
+```
+
+```{r}
+ggplot(total_long, aes(x = team_type, y = Goals, fill = team_type)) +
+  geom_boxplot() +
+  labs(title = "Goals by Home vs Away Teams", x = "Team Type", y = "Goals") +
+  theme_minimal()
+
+
+```
+
+```{r}
+ggplot(total_long, aes(x = Division, fill = as.factor(win_flag))) +
+  geom_bar(position = "dodge") +
+  labs(title = "Wins vs Losses by Division", x = "Division", fill = "Win (1) / Loss (0)") +
+  theme_minimal()
+
+```
+
+```{r}
+ggplot(total_long, aes(x = TZ_Gm_to_Gm_Diff, y = Goals, color = team_type)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Goals vs Time Zone Difference", x = "Time Zone Difference", y = "Goals") +
+  theme_minimal()
+
+```
+
+```{r}
+ggplot(total_long, aes(x = as.factor(win_flag), y = Distance, fill = as.factor(win_flag))) +
+  geom_boxplot() +
+  labs(title = "Travel Distance vs Game Outcome", x = "Win (1) / Loss (0)", y = "Travel Distance") +
+  theme_minimal()
+
+```
+
+```{r}
+#T-test: Do home and away teams score different amounts of goals?
+t.test(Goals ~ team_type, data = total_long)
+#statistically significant that home teams score more on average
+#they score an avg 0.19 to 0.39 more goals
+```
+
+```{r}
+# T-test: Do teams that win have more rest (days since last game)?
+t.test(Days_Gap ~ win_flag, data = total_long)
+#not significant
+#There’s no strong evidence that rest days significantly affect winning. The slight increase in rest for winning teams is too small and not statistically significant (p = 0.097).
+```
+
+```{r}
+# T-test: Do teams that win travel less?
+t.test(Distance ~ win_flag, data = total_long)
+#not significant
+#No strong evidence that the amount of travel affects whether a team wins or loses. The difference in travel distance is small (~25 miles), and the test result (p = 0.145) suggests it's not meaningful.
+```
+
+```{r}
+# Correlation: Travel distance vs goals scored
+cor.test(total_long$Distance, total_long$Goals)
+#No significant correlation between travel distance and goals scored. The very small negative correlation (-0.02) is essentially negligible and the p-value (0.2026) shows that this relationship is not statistically significant.
+```
+
+```{r}
+#Correlation: Days of rest vs goals
+cor.test(total_long$Days_Gap, total_long$Goals)
+#There is a weak positive correlation between the number of rest days (Days_Gap) and the goals scored in the game (Goals). Teams that have more rest days tend to score a little more, with a statistically significant result (p = 0.0073).
+```
+
+```{r}
+#Logistic Regression: Predict Win based on travel, rest, time zones
+glm_model <- glm(win_flag ~ Distance + TZ_Gm_to_Gm_Diff + Days_Gap,
+                 data = total_long, family = "binomial")
+summary(glm_model)
+
+#Distance has a statistically significant negative impact on the odds of winning. As teams travel further, their chances of winning decrease.
+
+#Time zone difference (TZ_Gm_to_Gm_Diff) and Days Gap (rest days) are marginally significant. These factors seem to have some effect on the likelihood #of winning, but the evidence isn't strong enough to conclusively say they're impactful.
+
+#The model overall suggests that rest days and travel distance could be influencing game outcomes, though there’s room for improvement in model fit (based on AIC and deviance).
+```
+
+```{r}
+#ANOVA: Are average goals different across divisions?
+anova_goals_div <- aov(Goals ~ Division, data = total_long)
+summary(anova_goals_div)
+#statistically significant difference in the mean of goals  between the different divisions in the NHL
+```
+```{r}
+library(dplyr)
+
+win_rate <- total_long %>%
+  group_by(TZ_Gm_to_Gm_Diff) %>%
+  summarize(win_rate = mean(win_flag, na.rm = TRUE))
+
+ggplot(win_rate, aes(x = as.factor(TZ_Gm_to_Gm_Diff), y = win_rate)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    x = "Time Zone Difference",
+    y = "Win Rate",
+    title = "Win Rate by Time Zone Difference"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+ggplot(total_long, aes(x = Distance, y = TZ_Gm_to_Gm_Diff)) +
+  geom_point(alpha = 0.4, color = "purple") +
+  geom_smooth(method = "lm", color = "darkred", se = FALSE) +
+  labs(
+    x = "Distance Traveled",
+    y = "Time Zone Difference",
+    title = "Distance vs. Time Zone Difference"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+# Remove rows with NA in relevant columns before plotting
+clean_data <- total_long %>%
+  filter(!is.na(TZ_Gm_to_Gm_Diff), !is.na(win_flag), !is.na(Days_Gap))
+
+ggplot(clean_data, aes(x = as.factor(TZ_Gm_to_Gm_Diff), y = win_flag, fill = as.factor(Days_Gap))) +
+  stat_summary(fun = mean, geom = "bar", position = "dodge") +
+  labs(
+    x = "Time Zone Difference",
+    y = "Win Rate",
+    fill = "Days Since Last Game",
+    title = "Win Rate by Time Zone Difference and Rest Days"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+total_long %>%
+  group_by(datetime) %>%
+  summarize(avg_tz_diff = mean(TZ_Gm_to_Gm_Diff, na.rm = TRUE)) %>%
+  ggplot(aes(x = datetime, y = avg_tz_diff)) +
+  geom_line(color = "darkgreen") +
+  labs(
+    title = "Average Time Zone Difference Over Season",
+    x = "Date",
+    y = "Average TZ Difference"
+  ) +
+  theme_minimal()
+
+```
+
