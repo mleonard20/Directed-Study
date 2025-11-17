@@ -1,0 +1,991 @@
+---
+title: "NHL Schedule"
+author: "Mari Leonard"
+date: "2025-01-20"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#install.packages("rvest")
+library(rvest)
+```
+
+```{r}
+url <- "https://www.hockey-reference.com/leagues/NHL_2025_games.html#games::5"
+webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+Nhl_sched <- tables[[1]]  # First table
+write.csv(Nhl_sched, "table.csv", row.names = FALSE)
+View(Nhl_sched)
+```
+
+
+```{r}
+url <- "https://www.hockey-reference.com/leagues/NHL_2025_standings.html#team_vs_team"
+#webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+Team_v_team <- tables[[4]]
+write.csv(Team_v_team, "table.csv", row.names = FALSE)
+View(Team_v_team)
+```
+
+```{r}
+url <- "https://www.hockey-reference.com/leagues/NHL_2025_standings.html#expanded_standings"
+webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+Exp_standings <- tables[[3]]
+write.csv(Exp_standings, "table.csv", row.names = FALSE)
+View(Exp_standings)
+```
+
+```{r}
+url <- "https://www.hockey-reference.com/leagues/NHL_2025_standings.html#expanded_standings"
+webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+West_Conf <- tables[[2]]
+write.csv(West_Conf, "table.csv", row.names = FALSE)
+View(West_Conf)
+```
+
+```{r}
+url <- "https://www.hockey-reference.com/leagues/NHL_2025_standings.html#expanded_standings"
+webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+East_Conf <- tables[[1]]
+write.csv(East_Conf, "table.csv", row.names = FALSE)
+View(East_Conf)
+```
+
+```{r}
+url <- "https://www.hockey-reference.com/leagues/NHL_2024_games.html#games"
+webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+Reg_szn2024 <- tables[[1]]
+write.csv(Reg_szn2024, "table.csv", row.names = FALSE)
+View(Reg_szn2024)
+```
+
+```{r}
+url <- "https://www.hockey-reference.com/leagues/NHL_2024_games.html#games"
+webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+Playoff2024 <- tables[[2]]
+write.csv(Playoff2024, "table.csv", row.names = FALSE)
+View(Playoff2024)
+```
+
+
+```{r}
+url <- "https://en.wikipedia.org/wiki/List_of_National_Hockey_League_arenas"
+webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+nhl_rinks <- tables[[1]]
+write.csv(nhl_rinks, "table.csv", row.names = FALSE)
+View(nhl_rinks)
+```
+
+
+```{r}
+url <- "https://www.hockey-reference.com/leagues/NHL_2017_games.html#games"
+webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+Sched16_17 <- tables[[1]]
+write.csv(Sched16_17, "table.csv", row.names = FALSE)
+View(Sched16_17)
+```
+
+```{r}
+url <- "https://www.hockey-reference.com/leagues/NHL_2018_games.html#games"
+webpage <- read_html(url)
+tables <- webpage %>% html_table(fill = TRUE)
+Sched17_18 <- tables[[1]]
+write.csv(Sched17_18, "table.csv", row.names = FALSE)
+View(Sched17_18)
+```
+
+#schedule times are all in ET
+
+```{r}
+library(readr)
+NHL16_17SCHED <- read_csv("/Users/marileonard/Desktop/College/Junior Year/Spring 2025/DS Directed Study/Data/NHL16-17SCHED.csv")
+View(NHL16_17SCHED)
+```
+
+```{r}
+library(readr)
+NHL17_18SCHED <- read_csv("/Users/marileonard/Desktop/College/Junior Year/Spring 2025/DS Directed Study/Data/NHL17-18SCHED.csv")
+View(NHL17_18SCHED)
+```
+
+```{r}
+library(dplyr)
+# Create NHL teams dataset with divisions
+nhl_teams16_17 <- data.frame(
+  Team = c("BOS", "TOR", "FLA", "TBL", "BUF", "DET", "OTT", "MTL",
+           "CAR", "NYR", "NJD", "PIT", "WSH", "NYI", "PHI", "CBJ",
+           "DAL", "COL", "WPG", "MIN", "STL", "NSH", "CHI", "ARI",
+           "VGK", "EDM", "LAK", "VAN", "SEA", "CGY", "SJS", "ANA"),
+  Division = c("Atlantic", "Atlantic", "Atlantic", "Atlantic", "Atlantic", "Atlantic", "Atlantic", "Atlantic",
+               "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan",
+               "Central", "Central", "Central", "Central", "Central", "Central", "Central", "Central",
+               "Pacific", "Pacific", "Pacific", "Pacific", "Pacific", "Pacific", "Pacific", "Pacific")
+)
+
+# Merge existing data with NHL teams data to add division
+merged_data16_17 <- NHL16_17SCHED %>%
+  left_join(nhl_teams16_17, by = "Team")
+
+# Print the new dataset with the added Division column
+print(merged_data16_17)
+```
+
+
+```{r}
+library(dplyr)
+
+cleaned_data16_17 <- merged_data16_17 %>%
+  select(Team, Game, `H/R`, Visitor, Home, Date, `Time (ET)`, `Time Zone`, `TZ Gm-to-Gm Diff`, `Days Gap`, Distance, Division) %>% rename(`Time (local)` = `Time (ET)`)
+
+print(cleaned_data16_17)
+```
+
+```{r}
+library(tidyverse)
+# Create NHL teams dataset with divisions
+nhl_teams17_18 <- data.frame(
+  Team = c("BOS", "TOR", "FLA", "TBL", "BUF", "DET", "OTT", "MTL",
+           "CAR", "NYR", "NJD", "PIT", "WSH", "NYI", "PHI", "CBJ",
+           "DAL", "COL", "WPG", "MIN", "STL", "NSH", "CHI", "ARI",
+           "VGK", "EDM", "LAK", "VAN", "SEA", "CGY", "SJS", "ANA"),
+  Division = c("Atlantic", "Atlantic", "Atlantic", "Atlantic", "Atlantic", "Atlantic", "Atlantic", "Atlantic",
+               "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan", "Metropolitan",
+               "Central", "Central", "Central", "Central", "Central", "Central", "Central", "Central",
+               "Pacific", "Pacific", "Pacific", "Pacific", "Pacific", "Pacific", "Pacific", "Pacific")
+)
+
+# Merge existing data with NHL teams data to add division
+merged_data17_18 <- NHL17_18SCHED %>%
+  left_join(nhl_teams17_18, by = "Team")
+
+# Print the new dataset with the added Division column
+print(merged_data17_18)
+view(merged_data17_18)
+```
+
+```{r}
+cleaned_data17_18 <- merged_data17_18 %>%
+  select(Team, Game, `H/R`, Visitor, Home, Date, `Time (local)`, `Time Zone`, `TZ Gm-to-Gm Diff`, `Days Gap`, Distance, Division)  # Keep only these columns
+
+print(cleaned_data17_18)
+view(cleaned_data17_18)
+```
+
+
+
+```{r}
+#creating a row with a unique ID
+
+library(dplyr)
+
+cleaned_data16_17 <- cleaned_data16_17 %>% mutate(unique_ID = 1:n())
+View(cleaned_data16_17)
+#cleaned_data16_17$new_column <- NULL
+cleaned_data16_17$unique_ID <- seq(1, by = 1, length.out = nrow(cleaned_data16_17))
+print(cleaned_data16_17)
+
+```
+
+#Step 1:
+
+```{r}
+#duplicating the date column so that I can split the schedule dataset into 2 to add the goals to each team
+
+Sched16_17$Date_2 <- Sched16_17$Date
+Sched16_17$Time_2 <- Sched16_17$Time
+#View(Sched16_17)
+colnames(Sched16_17)[c(4, 6)] <- c("Goals_Visitor", "Goals_Home")
+#split into 2 datasets
+Sched16_17Vistor <- Sched16_17[, 1:4]
+Sched16_17Home <- Sched16_17[, 5:ncol(Sched16_17)]
+
+#Step 2:
+#merge the time and date column for easier sorting
+library(dplyr)
+
+Sched16_17Vistor$Date <- as.Date(Sched16_17Vistor$Date, format = "%Y-%m-%d" )  # Adjust format as needed
+Sched16_17Vistor$Time <- as.POSIXct(Sched16_17Vistor$Time, format = "%I:%M %p")
+Sched16_17Vistor$datetime_column <- as.POSIXct(paste(Sched16_17Vistor$Date, format(Sched16_17Vistor$Time, "%I:%M %p")), format = "%Y-%m-%d %I:%M %p")
+Sched16_17Vistor <- Sched16_17Vistor %>% arrange(datetime_column)
+#View(Sched16_17Home)
+
+Sched16_17Home$Date_2 <- as.Date(Sched16_17Home$Date_2, format = "%Y-%m-%d" )  # Adjust format as needed
+Sched16_17Home$Time_2 <- as.POSIXct(Sched16_17Home$Time_2, format = "%I:%M %p")
+Sched16_17Home$datetime_column <- as.POSIXct(paste(Sched16_17Home$Date_2, format(Sched16_17Home$Time_2, "%I:%M %p")), format = "%Y-%m-%d %I:%M %p")
+
+View(Sched16_17Vistor)
+
+```
+
+#Step 3
+```{r}
+#Load necessary library
+library(dplyr)
+
+
+# Split the dataset into two groups 'h' and 'r' based on the 'H/R' column
+group_home16 <- cleaned_data16_17 %>%
+  filter(`H/R` == 'H')
+
+group_away16 <- cleaned_data16_17 %>%
+  filter(`H/R` == 'R')
+
+# View the results
+
+print(group_home16)
+#View(group_away16)
+print(group_away16)
+
+```
+#Step 4
+```{r}
+
+# Drop the 'home' column
+#group_away16 <- group_away16 %>%
+ #  select(-unique_ID)
+ # select(-Home)
+
+# Drop the 'visitor' column
+#group_home16 <- group_home16 %>%
+ # select(-unique_ID)
+  #select(-Visitor)
+
+View(group_home16)
+
+```
+
+#Step 5
+```{r}
+# Create a unique ID column
+group_away16 <- group_away16 %>%
+  mutate(id = row_number())
+
+# View the result
+print(group_away16)
+```
+#Step 6
+```{r}
+# Create a unique ID column
+group_home16 <- group_home16 %>%
+  mutate(id = row_number())
+
+# View the result
+print(group_home16)
+```
+#Step 7 
+```{r}
+
+# Check the structure of the date and time columns
+#str(group_away16)
+
+# Convert the 'date' column to Date type (it should already be in Date format)
+group_away16$Date <- as.Date(group_away16$Date, format = "%m/%d/%Y")
+
+# Check if date conversion worked
+#str(group_away16$Date)
+
+# Ensure the 'time' column is character type (if not, convert it)
+group_away16$`Time (local)` <- as.character(group_away16$`Time (local)`)
+
+# Check if the time column is correct
+#str(group_away16$`Time (local)`)
+
+# Combine the date and time into a single datetime column
+group_away16$datetime <- as.POSIXct(paste(group_away16$Date, group_away16$`Time (local)`), format = "%Y-%m-%d %H:%M:%S")
+
+# View the result
+print(group_away16)
+
+#rearranging columns
+#group_away16 <- group_away16[c(1, 2, 3, 4, 5, 11, 7, 8, 9, 10, 12, 6, 13)]
+```
+
+#Step 8
+```{r}
+#repeating all the same sets for the group_home16 dataset
+
+
+# Check the structure of the date column
+#str(group_home16$Date)
+
+# Convert the 'date' column to Date type (in case it is not recognized properly)
+group_home16$Date <- as.Date(group_home16$Date, format = "%m/%d/%Y")
+
+group_home16$`Time (local)` <- as.character(group_away16$`Time (local)`)
+
+
+# Combine the date and time into a single datetime column
+group_home16$datetime <- as.POSIXct(paste(group_home16$Date, group_home16$`Time (local)`), format = "%Y-%m-%d %H:%M:%S")
+
+# View the result
+print(group_home16)
+
+```
+#Step 9 
+```{r}
+team_map <- c(
+  "Anaheim" = "Anaheim Ducks",
+  "Arizona" = "Arizona Coyotes",
+  "Boston" = "Boston Bruins",
+  "Buffalo" = "Buffalo Sabres",
+  "Calgary" = "Calgary Flames",
+  "Carolina" = "Carolina Hurricanes",
+  "Chicago" = "Chicago Blackhawks",
+  "Colorado" = "Colorado Avalanche",
+  "Columbus" = "Columbus Blue Jackets",
+  "Dallas" = "Dallas Stars",
+  "Detroit" = "Detroit Red Wings",
+  "Edmonton" = "Edmonton Oilers",
+  "Florida" = "Florida Panthers",
+  "Los Angeles" = "Los Angeles Kings",
+  "Minnesota" = "Minnesota Wild",
+  "Montreal" = "Montreal Canadiens",
+  "Nashville" = "Nashville Predators",
+  "New Jersey" = "New Jersey Devils",
+  "N.Y. Rangers" = "New York Rangers",
+  "N.Y. Islanders" = "New York Islanders",
+  "Ottawa" = "Ottawa Senators",
+  "Philadelphia" = "Philadelphia Flyers",
+  "Pittsburgh" = "Pittsburgh Penguins",
+  "San Jose" = "San Jose Sharks",
+  "Seattle" = "Seattle Kraken",
+  "St. Louis" = "St. Louis Blues",
+  "Tampa Bay" = "Tampa Bay Lightning",
+  "Toronto" = "Toronto Maple Leafs",
+  "Vancouver" = "Vancouver Canucks",
+  "Vegas" = "Vegas Golden Knights",
+  "Washington" = "Washington Capitals",
+  "Winnipeg" = "Winnipeg Jets"
+)
+
+# Map city to team names using mutate and recode
+group_away16$Visitor_Name <- team_map[group_away16$Visitor]
+group_home16$Home_name <- team_map[group_home16$Home]
+# View the result
+print(group_away16)
+print(group_home16)
+```
+#Step 10 
+```{r}
+#arranging the rows so that they are the same as group_away16
+#Sched16_17Vistor <- Sched16_17Vistor %>%
+ # arrange(datetime_column, Visitor)
+
+#group_away16 <- group_away16 %>% 
+ # arrange(datetime, Visitor_Name)
+
+Sched16_17Home <- Sched16_17Home %>%
+  arrange(datetime_column, Home)
+
+group_home16 <- group_home16 %>% 
+  arrange(datetime, Home_name)
+```
+
+#Step 11
+```{r}
+# Remove the 3rd row
+group_away16 <- group_away16 %>% 
+  #slice(-1139)
+  #slice(-1024)
+#slice(-475)
+#slice(-377)
+
+group_home16 <- group_home16 %>% 
+  #slice(-1139)
+  #slice(-1024)
+#slice(-377, -476)
+
+Sched16_17Vistor <- Sched16_17Vistor %>% 
+  #slice(-1140)
+  #slice(-371, -1121, -1129)
+
+#slice(-1129)
+  #slice(-1121)
+  #slice(-371)
+
+Sched16_17Home <- Sched16_17Home %>% 
+  #slice(-1138)
+  #slice(-375, -1121, -1132)
+#print(Sched16_17Home)
+#getting rid of canadiens vs la  2/28 371
+#getting rid of detroit vs caroline 3/27 - 1121
+#getting rid of winnipeg vs devils 3/28 -1128/1132
+  #getting rid of dallas vs boston 3/30 1139/1140
+```
+
+#Step 12
+```{r}
+#Sched16_17Home <- Sched16_17Home %>%
+  #select(-Notes)
+  #select(-'OT')
+
+
+#colnames(Sched16_17Home)[3] <- "OT"
+print(Sched16_17Home)
+```
+
+#Step 13
+```{r}
+#add the goals from the sched16_17visitor dataset into the group_away16 dataset
+#group_away16$Goals_Visitor <- Sched16_17Vistor$Goals_Visitor
+group_away16 <- group_away16[c(1, 2, 3, 4, 16, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)]
+
+group_home16$Goals_Home <- Sched16_17Home$Goals_Home
+#group_home16 <- group_home16[c(1, 2, 3, 4, 16, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 )]
+
+#group_away16$Visitor_Name <- team_map[group_away16$Visitor]
+```
+
+```{r}
+#group_away16 <- group_away16 %>%
+ # rename(Away_Team = Team)
+
+#group_home16 <- group_home16 %>%
+ # rename(Home_Team = Team)
+
+```
+
+#Step 14
+```{r}
+#merge the two datasets 
+final16_17 <- merge(group_away16, group_home16, by = "id", all = TRUE)
+print(final16_17)
+View(final16_17)
+```
+#Step 15
+```{r}
+#remove repeated columns
+final16_17 <- final16_17 %>%
+  select(-datetime.y,
+         -datetime.x)
+```
+
+#Step 16 
+```{r}
+final16_17 <- final16_17 %>%  
+rename(Visitor_Team = Team.x,
+         Visitor_Game = Game.x,
+         Division_Visitor = Division.x,
+         Time_Zone_V = `Time Zone.x`,
+         TZ_Gm_to_Gm_Diff_V = `TZ Gm-to-Gm Diff.x`,
+         Days_Gap_V = `Days Gap.x`,
+         Distance_V = Distance.x,
+         Home_Team = Team.y,
+         Division_Home = Division.y,
+         Time_Zone_H = `Time Zone.y`,
+         TZ_Gm_to_Gm_Diff_H = `TZ Gm-to-Gm Diff.y`,
+         Days_Gap_H = `Days Gap.y`,
+         Distance_H = Distance.y)
+```
+
+#Step 17
+```{r}
+
+# Check the structure of the date column
+#str(final16_17$Date.x)
+
+# Convert the 'date' column to Date type (in case it is not recognized properly)
+final16_17$Date.x <- as.Date(final16_17$Date.x, format = "%m/%d/%Y")
+
+final16_17$`Time (local).x` <- as.character(final16_17$`Time (local).x`)
+
+
+# Combine the date and time into a single datetime column
+final16_17$datetime <- as.POSIXct(paste(final16_17$Date.x, final16_17$`Time (local).x`), format = "%Y-%m-%d %H:%M:%S")
+
+# View the result
+print(final16_17)
+```
+#Step 18 - final clean up 
+```{r}
+final16_17 <- final16_17 %>% 
+  select(-Date.y,
+         -`Time (local).y`)
+```
+
+## doing all the same steps for the 17-18 season schedule
+#Step 1
+```{r}
+#duplicating the date column so that I can split the schedule dataset into 2 to add the goals to each team
+
+#Sched17_18$Date_2 <- Sched17_18$Date
+#Sched17_18$Time_2 <- Sched17_18$Time
+#Sched17_18$Visitor2 <- Sched17_18$Visitor
+#Sched17_18$Home2 <- Sched17_18$Home
+View(Sched17_18)
+#colnames(Sched17_18)[c(4, 6)] <- c("Goals_Visitor", "Goals_Home")
+#colnames(Sched17_18)[c(7)] <- c("OT")
+
+#split into 2 datasets
+Sched17_18Visitor <- Sched17_18[, 1:5]   
+Sched17_18Home <- Sched17_18[, 6:ncol(Sched17_18)] 
+View(Sched17_18Home)
+View(Sched17_18Visitor)
+
+```
+#Step 2
+```{r}
+#merge the time and date column for easier sorting
+library(dplyr)
+
+Sched17_18Visitor$Date <- as.Date(Sched17_18Visitor$Date, format = "%Y-%m-%d" )  # Adjust format as needed
+Sched17_18Visitor$Time <- as.POSIXct(Sched17_18Visitor$Time, format = "%I:%M %p")
+Sched17_18Visitor$datetime_column <- as.POSIXct(paste(Sched17_18Visitor$Date, format(Sched17_18Visitor$Time, "%I:%M %p")), format = "%Y-%m-%d %I:%M %p")
+Sched17_18Visitor <- Sched17_18Visitor %>% arrange(datetime_column)
+#View(Sched16_17Home)
+
+Sched17_18Home$Date_2 <- as.Date(Sched17_18Home$Date_2, format = "%Y-%m-%d" )  # Adjust format as needed
+Sched17_18Home$Time_2 <- as.POSIXct(Sched17_18Home$Time_2, format = "%I:%M %p")
+Sched17_18Home$datetime_column <- as.POSIXct(paste(Sched17_18Home$Date_2, format(Sched17_18Home$Time_2, "%I:%M %p")), format = "%Y-%m-%d %I:%M %p")
+
+View(Sched17_18Visitor)
+```
+
+```{r}
+Sched17_18Home<- Sched17_18Home [c(1,2,7,8,3,4,5,6)]
+Sched17_18Visitor<-Sched17_18Visitor[c(3,4,5,6,1,2)]
+```
+
+#Step 3
+```{r}
+# Split the dataset into two groups 'h' and 'r' based on the 'H/R' column
+group_home17 <- cleaned_data17_18 %>%
+  filter(`H/R` == 'H')
+
+group_away17 <- cleaned_data17_18%>%
+  filter(`H/R` == 'R')
+
+# View the results
+View(group_away17)
+View(group_home17)
+
+```
+
+#Step 4: TBD
+```{r}
+# Drop the 'home' column
+#group_away16 <- group_away16 %>%
+ # select(-Home)
+
+# Drop the 'visitor' column
+#group_home16 <- group_home16 %>%
+  #select(-Visitor)
+
+#View(group_home16)
+```
+
+#Step 5
+```{r}
+# Create a unique ID column
+group_away17 <- group_away17 %>%
+  mutate(id = row_number())
+
+group_home17 <- group_home17 %>%
+  mutate(id = row_number())
+
+# View the result
+print(group_away17)
+```
+
+#Step 7 
+```{r}
+# Check the structure of the date and time columns
+#str(group_away17)
+
+# Convert the 'date' column to Date type (it should already be in Date format)
+group_away17$Date <- as.Date(group_away17$Date, format = "%m/%d/%Y")
+
+# Check if date conversion worked
+#str(group_away17$Date)
+
+# Ensure the 'time' column is character type (if not, convert it)
+group_away17$`Time (local)` <- as.character(group_away17$`Time (local)`)
+
+# Check if the time column is correct
+#str(group_away16$`Time (local)`)
+
+# Combine the date and time into a single datetime column
+group_away17$datetime <- as.POSIXct(paste(group_away17$Date, group_away17$`Time (local)`), format = "%Y-%m-%d %H:%M:%S")
+
+# View the result
+print(group_away17)
+
+```
+#Step 8
+```{r}
+# Check the structure of the date and time columns
+#str(group_away17)
+
+# Convert the 'date' column to Date type (it should already be in Date format)
+group_home17$Date <- as.Date(group_home17$Date, format = "%m/%d/%Y")
+
+# Check if date conversion worked
+#str(group_away17$Date)
+
+# Ensure the 'time' column is character type (if not, convert it)
+group_home17$`Time (local)` <- as.character(group_home17$`Time (local)`)
+
+# Check if the time column is correct
+#str(group_away16$`Time (local)`)
+
+# Combine the date and time into a single datetime column
+group_home17$datetime <- as.POSIXct(paste(group_home17$Date, group_home17$`Time (local)`), format = "%Y-%m-%d %H:%M:%S")
+
+# View the result
+print(group_home17)
+```
+
+#Step 9 
+```{r}
+team_map <- c(
+  "Ducks" = "Anaheim Ducks",
+  "Coyotes" = "Arizona Coyotes",
+  "Bruins" = "Boston Bruins",
+  "Sabres" = "Buffalo Sabres",
+  "Flames" = "Calgary Flames",
+  "Hurricanes" = "Carolina Hurricanes",
+  "Blackhawks" = "Chicago Blackhawks",
+  "Avalanche" = "Colorado Avalanche",
+  "Blue Jackets" = "Columbus Blue Jackets",
+  "Stars" = "Dallas Stars",
+  "Red Wings" = "Detroit Red Wings",
+  "Oilers" = "Edmonton Oilers",
+  "Panthers" = "Florida Panthers",
+  "Kings" = "Los Angeles Kings",
+  "Wild" = "Minnesota Wild",
+  "Canadiens" = "Montreal Canadiens",
+  "Predators" = "Nashville Predators",
+  "Devils" = "New Jersey Devils",
+  "Rangers" = "New York Rangers",
+  "Islanders" = "New York Islanders",
+  "Senators" = "Ottawa Senators",
+  "Flyers" = "Philadelphia Flyers",
+  "Penguins" = "Pittsburgh Penguins",
+  "Sharks" = "San Jose Sharks",
+  "Kraken" = "Seattle Kraken",
+  "Blues" = "St. Louis Blues",
+  "Lightning" = "Tampa Bay Lightning",
+  "Maple Leafs" = "Toronto Maple Leafs",
+  "Canucks" = "Vancouver Canucks",
+  "Golden Knights" = "Vegas Golden Knights",
+  "Capitals" = "Washington Capitals",
+  "Jets" = "Winnipeg Jets"
+)
+
+## Map city to team names using mutate and recode
+group_away17$Visitor_Name <- team_map[group_away17$Visitor]
+group_home17$Home_name <- team_map[group_home17$Home]
+
+group_away17$Home_Name <- team_map[group_away17$Home]
+group_home17$Visitor_Name <- team_map[group_home17$Visitor]
+
+```
+
+#Step 10
+```{r}
+#colnames(Sched17_18Home)[3] <- "OT"
+#print(Sched17_18Home)
+
+#Sched17_18Home <- Sched17_18Home %>%
+  #select(-Notes)
+  #select(-OT)
+
+#group_away17 <- group_away17 %>% 
+  #select(-Home)
+  #select(-Visitor)
+
+#group_home17 <- group_home17 %>% 
+  #select(-Home)
+  #select(-Visitor)
+```
+
+
+```{r}
+#rearrange columns
+#group_away17<- group_away17[c(1,2,3,4,14,5,6,7,8,9,10,11,12,13)]
+#group_home17<- group_home17[c(1,2,3,4,14,5,6,7,8,9,10,11,12,13)]
+```
+
+
+#Step 10 - still wrong - go through and make sure it all matches up 
+```{r}
+#arranging the rows so that they are the same as group_away16
+Sched17_18Visitor <- Sched17_18Visitor %>%
+  arrange(datetime_column, Visitor)
+
+group_away17 <- group_away17 %>% 
+  arrange(datetime, Visitor_Name)
+
+Sched17_18Home <- Sched17_18Home %>%
+  arrange(datetime_column, Visitor2)
+
+group_home17 <- group_home17 %>% 
+  arrange(datetime, Visitor_Name)
+```
+
+#Step 13
+```{r}
+#group_away17 <- group_away17[c(1, 2, 3, 4, 15, 5, 14, 8, 9, 10, 11, 12, 13, 6, 7)]
+
+#group_home17 <- group_home17[c(1, 2, 3, 4, 15, 5, 14, 8, 9, 10, 11, 12, 13, 6, 7)]
+
+```
+
+```{r}
+Sched17_18Home <- Sched17_18Home %>% 
+  slice(-781, -782, -785)
+
+Sched17_18Visitor <- Sched17_18Visitor %>% 
+  slice(-781, -782, -785)
+
+group_home17 <- group_home17 %>% 
+  slice(-783, -784) 
+
+group_away17 <- group_away17 %>% 
+  slice(-783, -784) 
+```
+
+
+
+```{r}
+#add the goals from the sched16_17visitor dataset into the group_away16 dataset
+group_away17$Goals_Visitor <- Sched17_18Visitor$Goals_Visitor
+
+group_home17$Goals_Home <- Sched17_18Home$Goals_Home
+
+```
+
+```{r}
+#group_home17 <- group_home17[c(1, 2, 3, 4, 15, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)]
+group_away17 <- group_away17[c(1, 2, 3, 4, 15, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)]
+```
+
+```{r}
+# Create a unique ID column
+group_home17 <- group_home17 %>%
+  mutate(id = row_number())
+
+group_away17 <- group_away17 %>%
+  mutate(id = row_number())
+```
+
+
+```{r}
+#merge the two datasets 
+final17_18 <- merge(group_away17, group_home17, by = "id", all = TRUE)
+print(final17_18)
+View(final17_18)
+```
+
+```{r}
+final17_18 <- final17_18 %>%  
+rename(Visitor_Team = Team.x,
+         Visitor_Game = Game.x,
+         Division_Visitor = Division.x,
+         Time_Zone_V = `Time Zone.x`,
+         TZ_Gm_to_Gm_Diff_V = `TZ Gm-to-Gm Diff.x`,
+         Days_Gap_V = `Days Gap.x`,
+         Distance_V = Distance.x,
+         Home_Team = Team.y,
+         Division_Home = Division.y,
+         Time_Zone_H = `Time Zone.y`,
+         TZ_Gm_to_Gm_Diff_H = `TZ Gm-to-Gm Diff.y`,
+         Days_Gap_H = `Days Gap.y`,
+         Distance_H = Distance.y)
+```
+
+
+```{r}
+final17_18 <- final17_18[c(8,2,3,9,10,11,12,13,5,6,23,24,25,26,27,7,20,14,15,16)]
+```
+
+```{r}
+final16_17 <- final16_17[c(26,2,3,7,9,10,11,12,6,8,15,16,20,22,23,24,25,19,21,27,28,29)]
+```
+
+```{r}
+final_16_17new = final16_17 %>% select(datetime, Visitor_Team, Visitor_Game, Time_Zone_V, TZ_Gm_to_Gm_Diff_V, Days_Gap_V, Distance_V, Division_Visitor, Visitor_Name, Goals_Visitor, Time_Zone_H, TZ_Gm_to_Gm_Diff_H, Days_Gap_H, Distance_H, Division_Home, Home_name, Goals_Home, Home_Team, winner, Home_Won, Away_Won)
+
+View(final_16_17new)
+```
+
+```{r}
+final_17_18new = final17_18 %>% select(datetime.x, Visitor_Team, Visitor_Game, Time_Zone_V, TZ_Gm_to_Gm_Diff_V, Days_Gap_V, Distance_V, Division_Visitor, Visitor_Name.x, Goals_Visitor, Time_Zone_H, TZ_Gm_to_Gm_Diff_H, Days_Gap_H, Distance_H, Division_Home, Home_Name, Goals_Home, Home_Team, winner, Home_Won, Away_Won)
+
+View(final_17_18new)
+```
+
+```{r}
+final_17_18new <- final_17_18new %>% 
+  rename(datetime = datetime.x,
+         Visitor_Name = Visitor_Name.x)
+```
+
+
+```{r}
+#merging together the 16-17 and 17-18 season together
+common_column_names <- intersect(names(final_16_17new), names(final_17_18new))
+
+
+total16_18 <- merge(final_16_17new, final_17_18new, by=common_column_names, all = TRUE)
+```
+
+
+```{r}
+total16_18 <- total16_18 %>%
+  mutate(Conference_H = case_when(
+    Division_Home %in% c("Atlantic", "Metropolitan") ~ "Eastern",
+    Division_Home %in% c("Central", "Pacific") ~ "Western",
+    TRUE ~ NA_character_  # handles any unexpected values
+  ))
+
+```
+
+```{r}
+total16_18 <- total16_18 %>%
+  mutate(Conference_V = case_when(
+    Division_Visitor %in% c("Atlantic", "Metropolitan") ~ "Eastern",
+    Division_Visitor %in% c("Central", "Pacific") ~ "Western",
+    TRUE ~ NA_character_  # handles any unexpected values
+  ))
+```
+
+
+```{r}
+# Step 2: Count wins per team
+team_wins <- total16_18 %>%
+  filter(!is.na(winner)) %>%
+  count(winner, name = "wins") %>%
+  rename(team = winner)
+
+#nhl_teams <- nhl_teams %>%
+  #rename(team = team_name)  # replace "Team" with your actual column name
+
+team_wins <- team_wins %>%
+  left_join(nhl_teams, by = "team")
+
+team_wins
+```
+
+```{r}
+#team_wins <- team_wins %>% 
+ # slice(-27, -30)
+#dropping the tie row and vegas (since 2017 was their first season their amount of wins was not fair for the other teams with 2 seasons worth)
+```
+
+
+```{r}
+
+# Assuming your data frame is called `game_data`
+travel_long <- total16_18 %>%
+  select(Home_name, Visitor_Name, Distance_H, Distance_V) %>%
+  pivot_longer(
+    cols = c(Home_name, Visitor_Name),
+    names_to = "home_or_away",
+    values_to = "team"
+  ) %>%
+  mutate(distance_traveled = ifelse(home_or_away == "home_team", Distance_H, Distance_V)) %>%
+  select(team, distance_traveled)
+
+# Make sure team names match (lowercase/trim if needed)
+travel_long <- travel_long %>%
+  left_join(nhl_teams %>% select(team, conference), by = "team")
+
+team_travel <- travel_long %>%
+  group_by(team, conference) %>%
+  summarise(total_distance = sum(distance_traveled, na.rm = TRUE), .groups = "drop")
+
+#team_travel <- team_travel %>% 
+ # slice(-29)
+#got rid of vgk again
+```
+
+```{r}
+team_travel <- team_travel %>%
+  left_join(nhl_teams %>% select(team, division), by = "team")
+
+```
+
+```{r}
+# Assuming team_wins has 'team' and 'wins' columns
+team_travel <- team_travel %>%
+  left_join(team_wins, by = "team")
+
+```
+
+```{r}
+team_travel <- team_travel[c(1,2,5,3,6)]
+```
+
+```{r}
+team_travel <- team_travel %>% 
+  rename(conference = conference.x,
+         division = division.x)
+```
+
+```{r}
+total16_18 <- total16_18 %>% 
+  rename(Team_V = Visitor_Team,
+         Game_V = Visitor_Game,
+         Division_V = Division_Visitor,
+         Name_V = Visitor_Name,
+         Goals_V = Goals_Visitor,
+         Division_H = Division_Home,
+         Goals_H = Goals_Home,
+         Team_H = Home_Team,
+         Name_H = Home_name,
+         Won_H = Home_Won,
+         Won_V = Away_Won)
+```
+
+
+```{r}
+library(tidyverse)
+
+total_long <- total16_18 %>%
+  pivot_longer(
+    cols = ends_with("_H") | ends_with("_V"),
+    names_to = c(".value", "team_type"),
+    names_pattern = "(.*)_(H|V)"
+  ) %>%
+  mutate(
+    team_type = recode(team_type, "H" = "Home", "V" = "Away"),
+    win_flag = ifelse(Won == 1, 1, 0)  # Use the unified 'Won' column
+  )
+```
+
+```{r}
+#total_long <- total_long %>% 
+ # select(-Game, -Home_Name)
+```
+
+```{r}
+install.packages("writexl")
+library(writexl)
+
+```
+
+```{r}
+write_xlsx(total16_18, "total16_18.xlsx")
+```
+
+```{r}
+getwd()
+```
+
+
